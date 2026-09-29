@@ -1,5 +1,4 @@
 def find_blank(state):
-    """Finds the index of the blank tile (0)."""
     return state.index(0)
 
 def get_neighbors(state):
