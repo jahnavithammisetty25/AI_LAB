@@ -101,17 +101,16 @@ if __name__ == "__main__":
         print("=" * 30)
         print("Target goal state successfully achieved!")
     else:
+        print("No solution found within the maximum limit      
+        print("=" * 30)
+        print("Target goal state successfully achieved!")
+    else:
         print("No solution found within the maximum limit.")
 
 
 OUTPUT:
 
 
-           
-        print("=" * 30)
-        print("Target goal state successfully achieved!")
-    else:
-        print("No solution found within the maximum limit.")
 Initial Board State:
  1 | 2 | 3 
 ---|---|---
