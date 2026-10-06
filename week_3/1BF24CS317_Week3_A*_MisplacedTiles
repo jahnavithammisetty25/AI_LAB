@@ -1,0 +1,150 @@
+import heapq
+
+def misplaced_tiles(state, goal):
+    count = 0
+
+    for i in range(9):
+        if state[i] != 0 and state[i] != goal[i]:
+            count += 1
+
+    return count
+
+
+def get_neighbors(state):
+    neighbors = []
+
+    zero = state.index(0)
+    row = zero // 3
+    col = zero % 3
+
+    moves = [
+        (-1, 0), # Up
+        (1, 0), # Down
+        (0, -1), # Left
+        (0, 1) # Right
+    ]
+
+    for dr, dc in moves:
+        new_row = row + dr
+        new_col = col + dc
+
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            new_zero = new_row * 3 + new_col
+
+            new_state = list(state)
+            new_state[zero], new_state[new_zero] = \
+                new_state[new_zero], new_state[zero]
+
+            neighbors.append(tuple(new_state))
+
+    return neighbors
+
+
+def print_state(state):
+    for i in range(0, 9, 3):
+        print(state[i:i+3])
+    print()
+
+
+def a_star(start, goal):
+
+    # Priority Queue
+    # (f, g, state)
+    pq = []
+
+    g = 0
+    h = misplaced_tiles(start, goal)
+    f = g + h
+
+    heapq.heappush(pq, (f, g, start))
+
+    parent = {}
+    cost = {start: 0}
+
+    while pq:
+
+        f, g, current = heapq.heappop(pq)
+
+        if current == goal:
+
+            path = []
+
+            while current in parent:
+                path.append(current)
+                current = parent[current]
+
+            path.append(start)
+            path.reverse()
+
+            print("Solution:")
+            for state in path:
+                print_state(state)
+
+            print("Number of moves:", len(path) - 1)
+            return
+
+        for child in get_neighbors(current):
+
+            new_g = g + 1
+
+            if child not in cost or new_g < cost[child]:
+
+                cost[child] = new_g
+                h = misplaced_tiles(child, goal)
+                f = new_g + h
+
+                parent[child] = current
+
+                heapq.heappush(pq, (f, new_g, child))
+
+    print("No solution found.")
+
+
+# -----------------------------
+# Main
+# -----------------------------
+
+print("Enter initial state:")
+start = tuple(map(int, input().split()))
+
+print("Enter goal state:")
+goal = tuple(map(int, input().split()))
+
+a_star(start, goal)
+
+OUTPUT:
+
+Enter initial state:
+2 8 3 1 6 4 0 7 5
+Enter goal state:
+1 2 3 8 0 4 7 6 5
+Solution:
+(2, 8, 3)
+(1, 6, 4)
+(0, 7, 5)
+
+(2, 8, 3)
+(1, 6, 4)
+(7, 0, 5)
+
+(2, 8, 3)
+(1, 0, 4)
+(7, 6, 5)
+
+(2, 0, 3)
+(1, 8, 4)
+(7, 6, 5)
+
+(0, 2, 3)
+(1, 8, 4)
+(7, 6, 5)
+
+(1, 2, 3)
+(0, 8, 4)
+(7, 6, 5)
+
+(1, 2, 3)
+(8, 0, 4)
+(7, 6, 5)
+
+Number of moves: 6
