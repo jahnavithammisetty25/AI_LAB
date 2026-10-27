@@ -1,0 +1,229 @@
+import math
+import random
+
+N = 8
+
+def get_cost(board):
+    
+    conflicts = 0
+    for i in range(N):
+        for j in range(i + 1, N):
+            if board[i] == board[j] or abs(board[i] - board[j]) == abs(i - j):
+                conflicts += 1
+    return conflicts
+
+def get_random_neighbour(current):
+    
+    next_board = list(current)
+    col = random.randint(0, N - 1)
+    current_row = current[col]
+    new_row = random.randint(0, N - 1)
+    
+    while new_row == current_row:
+        new_row = random.randint(0, N - 1)
+        
+    next_board[col] = new_row
+    return next_board
+
+def simulated_annealing_with_trace():
+   
+    current = [random.randint(0, N - 1) for _ in range(N)]
+
+    T = 50.0
+    cooling_rate = 0.995
+    step = 1
+
+    print("=========================================================================")
+    print("SIMULATED ANNEALING TRACE LOG (8-QUEENS)")
+    print("=========================================================================")
+    print(f"Step 0 (Initial State): {current} | Cost: {get_cost(current)}")
+    print(f"Initial Temperature (T): {T}\n")
+
+    
+    while T > 0.0001:
+        current_cost = get_cost(current)
+        
+        if current_cost == 0:
+            print(f"Perfect solution discovered at Step {step - 1}")
+            print(f"Final Configuration: {current}")
+            return
+
+ 
+        next_board = get_random_neighbour(current)
+        next_cost = get_cost(next_board)
+
+        
+        delta_E = current_cost - next_cost
+
+        
+        if step <= 15:
+            print(f"--- Step {step} ---")
+            print(f" Current State: {current} (Cost: {current_cost})")
+            print(f" Next State:    {next_board} (Cost: {next_cost})")
+            print(f" ΔE Calculation: {current_cost} - {next_cost} = {delta_E}")
+            print(f" Current Temp T: {T:.4f}")
+
+        
+        if delta_E > 0:
+            if step <= 15:
+                print("  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!")
+            current = next_board
+       
+        else:
+            p = math.exp(delta_E / T)
+            random_value = random.random()
+            accepted = random_value < p
+
+            if step <= 15:
+                print("  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:")
+                print(f"    Formula: p = e^({delta_E} / {T:.4f}) = {p:.6f}")
+                status_str = "ACCEPTED anyway!" if accepted else "REJECTED. Staying put."
+                print(f"    Random Roll vs Threshold: {random_value:.4f} < {p:.6f} -> {status_str}")
+
+            if accepted:
+                current = next_board
+
+        if step <= 15:
+            print()
+
+        
+        T *= cooling_rate;
+        step += 1
+        
+    print(f"Search finished. Final Board State: {current} with {get_cost(current)} conflicts remaining.")
+
+if __name__ == "__main__":
+    simulated_annealing_with_trace()
+
+
+output:
+
+=========================================================================
+SIMULATED ANNEALING TRACE LOG (8-QUEENS)
+=========================================================================
+Step 0 (Initial State): [6, 5, 4, 7, 7, 0, 4, 1] | Cost: 7
+Initial Temperature (T): 50.0
+
+--- Step 1 ---
+ Current State: [6, 5, 4, 7, 7, 0, 4, 1] (Cost: 7)
+ Next State:    [6, 5, 4, 7, 7, 4, 4, 1] (Cost: 9)
+ ΔE Calculation: 7 - 9 = -2
+ Current Temp T: 50.0000
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(-2 / 50.0000) = 0.960789
+    Random Roll vs Threshold: 0.0812 < 0.960789 -> ACCEPTED anyway!
+
+--- Step 2 ---
+ Current State: [6, 5, 4, 7, 7, 4, 4, 1] (Cost: 9)
+ Next State:    [6, 5, 4, 7, 3, 4, 4, 1] (Cost: 9)
+ ΔE Calculation: 9 - 9 = 0
+ Current Temp T: 49.7500
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(0 / 49.7500) = 1.000000
+    Random Roll vs Threshold: 0.5398 < 1.000000 -> ACCEPTED anyway!
+
+--- Step 3 ---
+ Current State: [6, 5, 4, 7, 3, 4, 4, 1] (Cost: 9)
+ Next State:    [6, 5, 4, 7, 3, 4, 7, 1] (Cost: 7)
+ ΔE Calculation: 9 - 7 = 2
+ Current Temp T: 49.5012
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+--- Step 4 ---
+ Current State: [6, 5, 4, 7, 3, 4, 7, 1] (Cost: 7)
+ Next State:    [6, 7, 4, 7, 3, 4, 7, 1] (Cost: 8)
+ ΔE Calculation: 7 - 8 = -1
+ Current Temp T: 49.2537
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(-1 / 49.2537) = 0.979902
+    Random Roll vs Threshold: 0.9667 < 0.979902 -> ACCEPTED anyway!
+
+--- Step 5 ---
+ Current State: [6, 7, 4, 7, 3, 4, 7, 1] (Cost: 8)
+ Next State:    [5, 7, 4, 7, 3, 4, 7, 1] (Cost: 6)
+ ΔE Calculation: 8 - 6 = 2
+ Current Temp T: 49.0075
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+--- Step 6 ---
+ Current State: [5, 7, 4, 7, 3, 4, 7, 1] (Cost: 6)
+ Next State:    [0, 7, 4, 7, 3, 4, 7, 1] (Cost: 6)
+ ΔE Calculation: 6 - 6 = 0
+ Current Temp T: 48.7624
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(0 / 48.7624) = 1.000000
+    Random Roll vs Threshold: 0.3771 < 1.000000 -> ACCEPTED anyway!
+
+--- Step 7 ---
+ Current State: [0, 7, 4, 7, 3, 4, 7, 1] (Cost: 6)
+ Next State:    [0, 7, 4, 1, 3, 4, 7, 1] (Cost: 5)
+ ΔE Calculation: 6 - 5 = 1
+ Current Temp T: 48.5186
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+--- Step 8 ---
+ Current State: [0, 7, 4, 1, 3, 4, 7, 1] (Cost: 5)
+ Next State:    [0, 7, 4, 1, 1, 4, 7, 1] (Cost: 6)
+ ΔE Calculation: 5 - 6 = -1
+ Current Temp T: 48.2760
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(-1 / 48.2760) = 0.979499
+    Random Roll vs Threshold: 0.9750 < 0.979499 -> ACCEPTED anyway!
+
+--- Step 9 ---
+ Current State: [0, 7, 4, 1, 1, 4, 7, 1] (Cost: 6)
+ Next State:    [0, 1, 4, 1, 1, 4, 7, 1] (Cost: 8)
+ ΔE Calculation: 6 - 8 = -2
+ Current Temp T: 48.0347
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(-2 / 48.0347) = 0.959218
+    Random Roll vs Threshold: 0.9001 < 0.959218 -> ACCEPTED anyway!
+
+--- Step 10 ---
+ Current State: [0, 1, 4, 1, 1, 4, 7, 1] (Cost: 8)
+ Next State:    [0, 1, 4, 1, 1, 4, 7, 2] (Cost: 6)
+ ΔE Calculation: 8 - 6 = 2
+ Current Temp T: 47.7945
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+--- Step 11 ---
+ Current State: [0, 1, 4, 1, 1, 4, 7, 2] (Cost: 6)
+ Next State:    [0, 1, 4, 1, 1, 4, 7, 1] (Cost: 8)
+ ΔE Calculation: 6 - 8 = -2
+ Current Temp T: 47.5555
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(-2 / 47.5555) = 0.958816
+    Random Roll vs Threshold: 0.9353 < 0.958816 -> ACCEPTED anyway!
+
+--- Step 12 ---
+ Current State: [0, 1, 4, 1, 1, 4, 7, 1] (Cost: 8)
+ Next State:    [0, 1, 0, 1, 1, 4, 7, 1] (Cost: 10)
+ ΔE Calculation: 8 - 10 = -2
+ Current Temp T: 47.3177
+  ↳ Decision: ΔE <= 0 (Worse/Equal state). Calculating probability:
+    Formula: p = e^(-2 / 47.3177) = 0.958613
+    Random Roll vs Threshold: 0.1574 < 0.958613 -> ACCEPTED anyway!
+
+--- Step 13 ---
+ Current State: [0, 1, 0, 1, 1, 4, 7, 1] (Cost: 10)
+ Next State:    [0, 1, 0, 1, 1, 4, 7, 0] (Cost: 9)
+ ΔE Calculation: 10 - 9 = 1
+ Current Temp T: 47.0811
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+--- Step 14 ---
+ Current State: [0, 1, 0, 1, 1, 4, 7, 0] (Cost: 9)
+ Next State:    [6, 1, 0, 1, 1, 4, 7, 0] (Cost: 6)
+ ΔE Calculation: 9 - 6 = 3
+ Current Temp T: 46.8457
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+--- Step 15 ---
+ Current State: [6, 1, 0, 1, 1, 4, 7, 0] (Cost: 6)
+ Next State:    [6, 6, 0, 1, 1, 4, 7, 0] (Cost: 5)
+ ΔE Calculation: 6 - 5 = 1
+ Current Temp T: 46.6115
+  ↳ Decision: ΔE > 0 (Better state found). Move accepted automatically!
+
+Perfect solution discovered at Step 1194
+Final Configuration: [4, 0, 7, 5, 2, 6, 1, 3]
