@@ -1,0 +1,77 @@
+def unify(x, y, subs):
+    # Apply existing substitutions
+    while x in subs:
+        x = subs[x]
+
+    while y in subs:
+        y = subs[y]
+
+    # If both are equal
+    if x == y:
+        return True
+
+    # If x is a variable
+    if x.islower() and x.isalpha():
+        if x in y:
+            return False
+        subs[x] = y
+        return True
+
+    # If y is a variable
+    if y.islower() and y.isalpha():
+        if y in x:
+            return False
+        subs[y] = x
+        return True
+
+    # If constants are different
+    return False
+
+
+def main():
+    print("UNIFICATION ALGORITHM")
+
+    p1 = input("Enter first predicate: ")
+    p2 = input("Enter second predicate: ")
+
+    if p1[0] != p2[0]:
+        print("FAILURE: Different predicates")
+        return
+
+    if p1.count(',') != p2.count(','):
+        print("FAILURE: Different number of arguments")
+        return
+
+    args1 = p1[p1.index('(')+1:p1.rindex(')')].split(',')
+    args2 = p2[p2.index('(')+1:p2.rindex(')')].split(',')
+
+    if len(args1) != len(args2):
+        print("FAILURE")
+        return
+
+    subs = {}
+
+    for x, y in zip(args1, args2):
+        x = x.strip()
+        y = y.strip()
+
+        if not unify(x, y, subs):
+            print("FAILURE: Cannot unify")
+            return
+
+    if not subs:
+        print("NIL")
+    else:
+        print("Unification Successful")
+        print("Substitution:", subs)
+
+
+main()
+
+OUTPUT:
+
+UNIFICATION ALGORITHM
+Enter first predicate: P(x,a)
+Enter second predicate: P(b,y)
+Unification Successful
+Substitution: {'x': 'b', 'a': 'y'}
